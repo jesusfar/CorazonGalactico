@@ -106,7 +106,7 @@
 
 <canvas id="c"></canvas>
 
-<audio id="audio" loop src="tengoku he ikou.mp3"></audio>
+<audio id="audio" loop playsinline preload="auto" src="tengoku he ikou.mp3"></audio>
 
 <script src="./Corazón Galáctico❤_files/three.min.js.descargar"></script>
 <script>
@@ -115,17 +115,43 @@ const startScreen = document.getElementById('start-screen');
 const audio = document.getElementById('audio');
 audio.preload = 'auto';
 audio.load();
+audio.volume = 0.65;
 
 let experienceStarted = false;
+let audioRetryTimer = null;
+
+function tryPlayAudio() {
+  if (experienceStarted || !audio) return;
+  const playPromise = audio.play();
+  if (playPromise && typeof playPromise.then === 'function') {
+    playPromise.then(() => {
+      audio.volume = 0.65;
+      audio.muted = false;
+      if (audioRetryTimer) clearTimeout(audioRetryTimer);
+    }).catch(() => {
+      if (audioRetryTimer) clearTimeout(audioRetryTimer);
+      audioRetryTimer = setTimeout(() => {
+        tryPlayAudio();
+      }, 400);
+    });
+  }
+}
+
 function unlockAudioAndStart() {
   if (experienceStarted) return;
   experienceStarted = true;
-  const playPromise = audio.play();
-  if (playPromise && typeof playPromise.catch === 'function') {
-    playPromise.catch(err => console.log("Audio no autoplay:", err));
-  }
+  tryPlayAudio();
   startScreen.classList.add('hidden');
 }
+
+['touchend', 'pointerdown', 'keydown'].forEach(type => {
+  window.addEventListener(type, () => {
+    if (!experienceStarted) {
+      tryPlayAudio();
+    }
+  }, {passive: true});
+});
+
 startScreen.addEventListener('touchend', (e) => {
   e.preventDefault();
   unlockAudioAndStart();
@@ -351,9 +377,9 @@ const baseWords = [
   { text: 'Eevee es perfecta', icon: 'eevee' }, { text: 'Haría lo que fuera por ti', icon: 'sylveon' }, 'Eevee y Cyn por siempre 💛💜',
   { text: 'Eevee la más pro', icon: 'jolteon' }, 'La Mejor Distractora 📣', 'Sos Magnifica ✨',
   'Mi refugio perfecto 🕊️', 'La más crack del universo 📅', 'Conexión del alma 🔗',
-  'Amiga de otra galaxia 🌙', 'Eevee es la mejor dibujante', 'Perfecta y pro 🌟', 'Eres increíble 🌹',
+  'Amiga de otra galaxia 🌙', 'Eevee es la mejor dibujante ✨', 'Perfecta y pro 🌟', 'Eres increíble 🌹',
   { text: 'Gracias por ser mi Amiga', icon: 'masterball' }, 'Brillas más que cualquier estrella ⭐',
-  'Tu amistad brilla 💛💜', 'Eevee es la número uno'
+  'Tu amistad brilla 💛💜', 'Eevee es la número uno 🌟'
 ];
 
 const PHRASE_REPEAT = isMobile ? 4 : 6;
@@ -383,8 +409,8 @@ function makeTextTexture(phrase, color, phraseIcons){
   const ctx = c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height);
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   let fontSize = 50;
-  const iconSize = 48;
-  const iconGap = 16;
+  const iconSize = 56;
+  const iconGap = 18;
   ctx.font = `700 ${fontSize}px "Playfair Display", serif`;
   const extraWidth = () => icon ? iconSize + iconGap : 0;
   while (ctx.measureText(text).width + extraWidth() > c.width - 50 && fontSize > 26) {
@@ -410,7 +436,7 @@ Promise.all([document.fonts.ready, loadPhraseIcons()]).then(([, phraseIcons]) =>
     const tex = makeTextTexture(WORDS[i], COLORS[i%COLORS.length], phraseIcons);
     const mat = new THREE.SpriteMaterial({map: tex, transparent: true});
     const sp = new THREE.Sprite(mat);
-    sp.scale.set(98, 12.25, 1);
+    sp.scale.set(112, 14, 1);
     const phi = Math.acos(2 * Math.random() - 1); const theta = Math.random() * Math.PI * 2;
     const r = DUST_INNER_R + Math.random() * (DUST_OUTER_R - DUST_INNER_R - 30);
     sp.position.set(r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
