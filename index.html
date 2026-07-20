@@ -119,16 +119,20 @@ audio.volume = 0.65;
 
 let experienceStarted = false;
 let audioRetryTimer = null;
+let audioPlayAttempted = false;
 
 function tryPlayAudio() {
-  if (experienceStarted || !audio) return;
+  if (!audio || audioPlayAttempted) return;
+  audioPlayAttempted = true;
+  audio.currentTime = 0;
+  audio.volume = 0.65;
+  audio.muted = false;
   const playPromise = audio.play();
   if (playPromise && typeof playPromise.then === 'function') {
     playPromise.then(() => {
-      audio.volume = 0.65;
-      audio.muted = false;
       if (audioRetryTimer) clearTimeout(audioRetryTimer);
     }).catch(() => {
+      audioPlayAttempted = false;
       if (audioRetryTimer) clearTimeout(audioRetryTimer);
       audioRetryTimer = setTimeout(() => {
         tryPlayAudio();
@@ -373,26 +377,26 @@ scene.add(ring1); scene.add(ring2);
 // Frases
 const WORDS = [];
 const baseWords = [
-  { text: 'Eres mi lugar favorito 🏡', icon: 'eevee' },
-  { text: 'Contigo todo es mejor ✨', icon: 'jolteon' },
-  { text: 'Mi felicidad tiene tu nombre 💖', icon: 'sylveon' },
+  { text: 'Eres mi lugar favorito', icon: 'eevee' },
+  { text: 'Contigo todo es mejor', icon: 'jolteon' },
+  { text: 'Mi felicidad tiene tu nombre', icon: 'sylveon' },
   { text: 'Eevee es perfecta', icon: 'masterball' },
   { text: 'Haría lo que fuera por ti', icon: 'eevee' },
-  { text: 'Eevee y Cyn por siempre 💛💜', icon: 'jolteon' },
+  { text: 'Eevee y Cyn por siempre', icon: 'jolteon' },
   { text: 'Eevee la más pro', icon: 'sylveon' },
-  { text: 'La Mejor Distractora 📣', icon: 'masterball' },
-  { text: 'Sos Magnifica ✨', icon: 'eevee' },
-  { text: 'Mi refugio perfecto 🕊️', icon: 'jolteon' },
-  { text: 'La más crack del universo 📅', icon: 'sylveon' },
-  { text: 'Conexión del alma 🔗', icon: 'masterball' },
-  { text: 'Amiga de otra galaxia 🌙', icon: 'eevee' },
-  { text: 'Eevee es la mejor dibujante ✨', icon: 'jolteon' },
-  { text: 'Perfecta y pro 🌟', icon: 'sylveon' },
-  { text: 'Eres increíble 🌹', icon: 'masterball' },
+  { text: 'La Mejor Distractora', icon: 'masterball' },
+  { text: 'Sos Magnifica', icon: 'eevee' },
+  { text: 'Mi refugio perfecto', icon: 'jolteon' },
+  { text: 'La más crack del universo', icon: 'sylveon' },
+  { text: 'Conexión del alma', icon: 'masterball' },
+  { text: 'Amiga de otra galaxia', icon: 'eevee' },
+  { text: 'Eevee es la mejor dibujante', icon: 'jolteon' },
+  { text: 'Perfecta y pro', icon: 'sylveon' },
+  { text: 'Eres increíble', icon: 'masterball' },
   { text: 'Gracias por ser mi Amiga', icon: 'eevee' },
-  { text: 'Brillas más que cualquier estrella ⭐', icon: 'jolteon' },
-  { text: 'Tu amistad brilla 💛💜', icon: 'sylveon' },
-  { text: 'Eevee es la número uno 🌟', icon: 'masterball' }
+  { text: 'Brillas más que cualquier estrella', icon: 'jolteon' },
+  { text: 'Tu amistad brilla', icon: 'sylveon' },
+  { text: 'Eevee es la número uno', icon: 'masterball' }
 ];
 
 const PHRASE_REPEAT = isMobile ? 4 : 6;
